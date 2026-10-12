@@ -78,3 +78,42 @@ The first stage should focus on detecting and recording UI failures. Automatic e
 ## 7. Current Status
 
 This document is an initial research draft. The test cases and implementation approach should be reviewed with the team before implementation.
+
+## 8. Detailed UI Failure Test Cases
+
+These test cases are proposed for future validation. They have not yet been executed.
+
+| Test ID | Scenario | Test Action | Expected Result |
+|---|---|---|---|
+| TC-01 | Changed element ID | Change a button's ID and rerun the workflow | The automation records whether the button can be located |
+| TC-02 | Changed button text | Change the button text and rerun the workflow | The result indicates whether the original locator still works |
+| TC-03 | Missing element | Remove a required button from the test page | The automation records an element-not-found failure |
+| TC-04 | Slow page loading | Delay the appearance of a required element | The automation waits according to its configured timeout and records the outcome |
+| TC-05 | Unexpected dialog | Display a dialog during the workflow | The automation records how the dialog affects execution |
+| TC-06 | Moved element | Move a button to another location on the page | The test checks whether the automation still identifies the correct button |
+
+## 9. Test Result Template
+
+Use this template when the team starts running the tests.
+
+- Test ID:
+- Date:
+- Workflow:
+- UI change introduced:
+- Expected result:
+- Actual result:
+- Pass/Fail:
+- Error message:
+- Screenshot available: Yes/No
+- Notes:
+
+## 10. Next Steps
+
+1. Review these proposed cases with the team.
+2. Select a simple test webpage or test application.
+3. Establish a baseline run before changing the UI.
+4. Introduce one change at a time and rerun the workflow.
+5. Record actual results and screenshots.
+6. Discuss failure detection and possible recovery with the team.
+
+Automatic repair should not be claimed until it has been implemented and tested.
