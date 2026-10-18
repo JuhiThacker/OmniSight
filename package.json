@@ -1,0 +1,16 @@
+
+{
+  "name": "omnisight",
+  "version": "1.0.0",
+  "private": true,
+  "description": "OmniSight UI automation and failure detection project",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "playwright": "^1.55.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.9.0"
+  }
+}
