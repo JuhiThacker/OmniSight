@@ -98,4 +98,12 @@ export function validateWorkflow(workflow: Workflow): string[] {
 
   return errors;
 }
+
+/**
+ * Checks whether a workflow is ready for execution.
+ * Returns true only when validation finds no errors.
+ */
+export function isWorkflowReady(workflow: Workflow): boolean {
+  return validateWorkflow(workflow).length === 0;
+}
 ```
