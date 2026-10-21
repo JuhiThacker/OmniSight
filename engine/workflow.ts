@@ -106,4 +106,23 @@ export function validateWorkflow(workflow: Workflow): string[] {
 export function isWorkflowReady(workflow: Workflow): boolean {
   return validateWorkflow(workflow).length === 0;
 }
+
+/**
+ * Checks whether an action is supported by OmniSight.
+ * Returns true if the action belongs to the supported action list.
+ */
+export function isSupportedAction(
+  action: string
+): action is WorkflowAction {
+  const supportedActions: WorkflowAction[] = [
+    "goto",
+    "click",
+    "type",
+    "select",
+    "wait",
+    "extract",
+  ];
+
+  return supportedActions.includes(action as WorkflowAction);
+}
 ```
