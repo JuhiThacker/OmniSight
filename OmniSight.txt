@@ -1,0 +1,283 @@
+OmniSight: Zero to One
+
+This guide gets you from an empty folder to a working bot that completes a workflow, and then breaks when the UI changes. That breaking point is the problem OmniSight solves, and it is the foundation for everything else.
+
+I've chosen Python for the whole project. The desktop module (PyAutoGUI), fuzzy matching (rapidfuzz) and the backend (FastAPI) are all Python, so you stay in one language. Commands are for Windows, with Mac/Linux differences noted.
+
+Step 1: Install the tools (about 30 minutes)
+Python 3.11 or newer from python.org. On Windows, tick "Add Python to PATH". Check with python --version.
+Git from git-scm.com. Check with git --version.
+VS Code with the Python extension.
+A GitHub account, to push your repo daily.
+Step 2: Create the project (about 20 minutes)
+
+Open a terminal and run:
+
+bash
+mkdir omnisight
+cd omnisight
+git init
+python -m venv .venv
+.venv\Scripts\activate          # Mac/Linux: source .venv/bin/activate
+pip install playwright pydantic rapidfuzz fastapi uvicorn python-dotenv
+playwright install chromium
+
+If PowerShell blocks activation, run Set-ExecutionPolicy -Scope Process Bypass and activate again.
+
+Create a .gitignore file:
+
+.venv/
+runs/
+.env
+__pycache__/
+omnisight.db
+
+Create these folders (empty for now): core, ai, healing, safety, api, storage, test_app, workflows, runs.
+
+Commit: git add . && git commit -m "Initial setup".
+
+Step 3: Build your test app (about 30 minutes)
+
+You need a website you control, so you can change its UI on purpose and watch the bot break. Create test_app/index.html:
+
+html
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Demo Shop</title></head>
+<body>
+  <h1>Demo Shop</h1>
+
+  <div id="login-view">
+    <input id="username" placeholder="Username">
+    <input id="password" type="password" placeholder="Password">
+    <button id="login-btn">Login</button>
+  </div>
+
+  <div id="app-view" style="display:none">
+    <h2 id="welcome">Welcome!</h2>
+    <input id="search-input" placeholder="Search products">
+    <button id="search-btn">Search</button>
+    <ul id="results"></ul>
+  </div>
+
+<script>
+  const q = (id) => document.getElementById(id);
+  const user = q("username"), pass = q("password"), loginBtn = q("login-btn");
+  const search = q("search-input"), searchBtn = q("search-btn");
+
+  // MUTATION: open index.html?v=2 and the IDs and button text change
+  if (new URLSearchParams(location.search).get("v") === "2") {
+    user.id = "user-field";
+    pass.id = "pass-field";
+    loginBtn.id = "signin-btn";
+    loginBtn.textContent = "Sign in";
+    searchBtn.id = "find-btn";
+  }
+
+  loginBtn.onclick = () => {
+    q("login-view").style.display = "none";
+    q("app-view").style.display = "block";
+  };
+
+  const products = ["Running Shoes", "Leather Boots", "Canvas Sneakers", "Wool Socks"];
+  searchBtn.onclick = () => {
+    const term = search.value.toLowerCase();
+    q("results").innerHTML = products
+      .filter(p => p.toLowerCase().includes(term))
+      .map(p => "<li>" + p + "</li>").join("");
+  };
+</script>
+</body>
+</html>
+
+Serve it. Open a second terminal, activate the venv, and run:
+
+bash
+cd test_app
+python -m http.server 8000
+
+Open http://localhost:8000/index.html in your browser. Log in with anything, search "shoes", and check it works. Then open ?v=2 at the end of the URL and notice that the button now says "Sign in". Leave this server running.
+
+Step 4: Write your first workflow (about 15 minutes)
+
+Create workflows/login_and_search.json:
+
+json
+{
+  "name": "login_and_search",
+  "start_url": "http://localhost:8000/index.html",
+  "steps": [
+    {"id": 1, "action": "type",  "target": "#username",     "value": "demo",      "description": "Username field"},
+    {"id": 2, "action": "type",  "target": "#password",     "value": "secret123", "description": "Password field"},
+    {"id": 3, "action": "click", "target": "#login-btn",    "description": "Login button", "expect": "Welcome message visible"},
+    {"id": 4, "action": "type",  "target": "#search-input", "value": "shoes",     "description": "Search box"},
+    {"id": 5, "action": "click", "target": "#search-btn",   "description": "Search button"},
+    {"id": 6, "action": "extract", "target": "#results li", "description": "Search results", "expect": "at least one result"}
+  ]
+}
+
+Each step has a plain selector (target) and a human description. The selector is what the basic bot uses. The description is what the vision model uses later to find the element when the selector breaks. Use only fake credentials in workflows.
+
+Step 5: Add logging (about 20 minutes)
+
+Create storage/db.py:
+
+python
+import sqlite3
+from pathlib import Path
+
+DB = Path("omnisight.db")
+
+def init():
+    with sqlite3.connect(DB) as c:
+        c.execute("""CREATE TABLE IF NOT EXISTS steps(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            run_id TEXT, step_id INTEGER, action TEXT, target TEXT,
+            status TEXT, error TEXT, screenshot TEXT,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP)""")
+
+def log_step(run_id, r, screenshot):
+    with sqlite3.connect(DB) as c:
+        c.execute(
+            "INSERT INTO steps(run_id, step_id, action, target, status, error, screenshot) "
+            "VALUES (?,?,?,?,?,?,?)",
+            (run_id, r["id"], r["action"], r["target"], r["status"], r["error"], screenshot),
+        )
+Step 6: Write the executor, your first real module (about 1 hour)
+
+Create core/executor.py:
+
+python
+import json
+import sys
+import time
+from pathlib import Path
+from playwright.sync_api import sync_playwright
+from storage import db
+
+RUNS_DIR = Path("runs")
+STEP_TIMEOUT = 3000  # ms, short so failures show up fast
+
+
+def execute_step(page, step, res):
+    action, target = step["action"], step["target"]
+    if action == "click":
+        page.click(target, timeout=STEP_TIMEOUT)
+    elif action == "type":
+        page.fill(target, step["value"], timeout=STEP_TIMEOUT)
+    elif action == "select":
+        page.select_option(target, step["value"], timeout=STEP_TIMEOUT)
+    elif action == "wait":
+        page.wait_for_selector(target, timeout=step.get("timeout", 5000))
+    elif action == "extract":
+        page.wait_for_selector(target, timeout=STEP_TIMEOUT)
+        res["data"] = page.locator(target).all_inner_texts()
+    else:
+        raise ValueError(f"Unknown action: {action}")
+
+
+def run_workflow(path, url_override=None, headless=False):
+    wf = json.loads(Path(path).read_text())
+    url = url_override or wf["start_url"]
+    run_id = time.strftime("%Y%m%d_%H%M%S")
+    out = RUNS_DIR / run_id
+    out.mkdir(parents=True, exist_ok=True)
+    db.init()
+    results = []
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=headless, slow_mo=300)
+        page = browser.new_page()
+        page.goto(url)
+
+        for step in wf["steps"]:
+            res = {"id": step["id"], "action": step["action"],
+                   "target": step["target"], "status": "ok", "error": None}
+            try:
+                execute_step(page, step, res)
+            except Exception as e:
+                res["status"] = "failed"
+                res["error"] = str(e).splitlines()[0]
+
+            shot = out / f"step_{step['id']:02d}_{res['status']}.png"
+            page.screenshot(path=str(shot))
+            db.log_step(run_id, res, str(shot))
+            results.append(res)
+            print(f"[{res['status'].upper()}] step {step['id']}: {step['action']} {step['target']}")
+
+            if res["status"] == "failed":
+                break  # later, the healer will step in here
+
+        browser.close()
+
+    (out / "result.json").write_text(json.dumps(results, indent=2))
+    return results
+
+
+if __name__ == "__main__":
+    wf_path = sys.argv[1]
+    url = sys.argv[2] if len(sys.argv) > 2 else None
+    run_workflow(wf_path, url)
+Step 7: Run it, then break it (the "aha" moment)
+
+From the project root, with the test app server still running:
+
+bash
+python -m core.executor workflows/login_and_search.json
+
+A browser opens and you should see six [OK] lines. Check the runs/ folder for one screenshot per step.
+
+Now run it against the mutated UI:
+
+bash
+python -m core.executor workflows/login_and_search.json "http://localhost:8000/index.html?v=2"
+
+It fails at step 1 because #username no longer exists. Open the failing screenshot. This is the exact problem OmniSight fixes. Commit your work and push it to GitHub.
+
+Step 8: Your Week 1 daily checklist
+Day	Goal	Output
+1	Steps 1–3	Environment ready, test app running
+2	Steps 4–5	Workflow JSON and SQLite logging
+3	Step 6	Executor written
+4	Step 7	Baseline works, mutation breaks it. Add 2–3 more mutations (change text, move a button)
+5	Perception	core/perception.py: screenshot plus a function that lists visible interactive elements (tag, text, id, position)
+6	LLM client	ai/llm_client.py: get an API key, store it in .env, and write one function ask_vision(image, prompt) that returns JSON
+7	Verifier + locate	Ask the model "where is the Login button?" using a screenshot and the step's description. Verify each step after it runs
+
+For Days 5–7, the DOM listing can come from page.evaluate(), which runs JavaScript in the page and returns the elements. Never commit your .env file or API key.
+
+Common problems
+playwright not found: the venv is not activated. Run the activate command again.
+Browser doesn't open: run playwright install chromium again.
+ModuleNotFoundError: storage: run from the project root with python -m core.executor, not from inside core/.
+Connection refused: the test app server is not running. Check the second terminal.
+Port 8000 busy: use 8001 and change the URL in the workflow.
+What comes after Week 1
+
+Week 2 builds the self-healing ladder: retry, fallback locators, fuzzy match, vision recovery, locator memory. Everything there plugs into the if res["status"] == "failed" point in the executor.
+
+If you want, I can write the Day 5 perception module next, or put this guide into a Word document like the earlier ones.
+
+
+
+| #  | Module                           | Purpose                           |
+| -- | -------------------------------- | --------------------------------- |
+| 1  | **AI Agent / Orchestrator**      | Controls the entire agent         |
+| 2  | **UI Observation**               | Collects UI information           |
+| 3  | **Computer Vision**              | Understands visual UI             |
+| 4  | **OCR**                          | Extracts text                     |
+| 5  | **Multimodal Understanding**     | Combines screenshot + DOM + OCR   |
+| 6  | **Task & Workflow Manager**      | Manages tasks and workflows       |
+| 7  | **AI Planner & Decision Engine** | Decides next actions              |
+| 8  | **RPA Action Engine**            | Performs UI actions               |
+| 9  | **Verification Engine**          | Confirms actions succeeded        |
+| 10 | **Self-Healing Engine**          | Recovers from UI changes/errors   |
+| 11 | **Confidence & Risk Engine**     | Controls automated decisions      |
+| 12 | **Memory & Learning**            | Remembers successful workflows    |
+| 13 | **Agent Loop**                   | Observe → Think → Act → Verify    |
+| 14 | **Application Adapters**         | Supports browser/desktop/POS/etc. |
+| 15 | **Tool Integration**             | APIs, files, DB, email, etc.      |
+| 16 | **Security & Permissions**       | Controls dangerous actions        |
+| 17 | **Logging & Audit**              | Records every execution           |
+| 18 | **Analytics & Monitoring**       | Measures performance              |
+| 19 | **Testing & Simulation**         | Tests self-healing                |

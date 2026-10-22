@@ -1,0 +1,30 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Build output
+build/
+dist/
+*.spec.bak
+
+# Secrets and environment files
+.env
+.env.*
+!.env.example
+secrets/
+credentials.json
+
+# Editors and operating system
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local chatbot conversation history
+python_ai_chatbot/data/chats.json
