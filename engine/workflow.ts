@@ -28,9 +28,27 @@ export interface Workflow {
 }
 
 /**
+ * Checks whether an action is supported by OmniSight.
+ */
+export function isSupportedAction(
+  action: string
+): action is WorkflowAction {
+  const supportedActions: string[] = [
+    "goto",
+    "click",
+    "type",
+    "select",
+    "wait",
+    "extract",
+  ];
+
+  return supportedActions.includes(action);
+}
+
+/**
  * Checks whether a workflow has the minimum required information.
- * Returns an array of error messages. An empty array means
- * that no validation errors were found.
+ * Returns an array of validation errors.
+ * An empty array means no errors were found.
  */
 export function validateWorkflow(workflow: Workflow): string[] {
   const errors: string[] = [];
@@ -64,6 +82,13 @@ export function validateWorkflow(workflow: Workflow): string[] {
 
   // Validate each workflow step.
   for (const step of workflow.steps) {
+    // Check that the action is supported.
+    if (!isSupportedAction(step.action)) {
+      errors.push(
+        `Step ${step.id || "(no ID)"} uses an unsupported action.`
+      );
+    }
+
     // Check that every step has a unique ID.
     if (!step.id.trim()) {
       errors.push("Every step must have an ID.");
@@ -75,7 +100,9 @@ export function validateWorkflow(workflow: Workflow): string[] {
 
     // Check that every step has a description.
     if (!step.description.trim()) {
-      errors.push(`Step ${step.id || "(no ID)"} needs a description.`);
+      errors.push(
+        `Step ${step.id || "(no ID)"} needs a description.`
+      );
     }
 
     // These actions require a target element.
@@ -94,6 +121,51 @@ export function validateWorkflow(workflow: Workflow): string[] {
         `Step ${step.id || "(no ID)"} requires a target for action "${step.action}".`
       );
     }
+
+    // Navigation and typing actions require a value.
+    if (
+      (step.action === "goto" || step.action === "type") &&
+      !step.value?.trim()
+    ) {
+      errors.push(
+        `Step ${step.id || "(no ID)"} requires a value for action "${step.action}".`
+      );
+    }
+
+    // Validate the destination URL for navigation actions.
+    if (step.action === "goto" && step.value?.trim()) {
+      try {
+        const destination = new URL(step.value);
+
+        if (
+          destination.protocol !== "http:" &&
+          destination.protocol !== "https:"
+        ) {
+          errors.push(
+            `Step ${step.id || "(no ID)"} destination must use HTTP or HTTPS.`
+          );
+        }
+      } catch {
+        errors.push(
+          `Step ${step.id || "(no ID)"} must have a valid destination URL.`
+        );
+      }
+    }
+
+    // Wait actions require a non-negative duration in milliseconds.
+    if (step.action === "wait") {
+      const duration = Number(step.value);
+
+      if (
+        !step.value?.trim() ||
+        !Number.isFinite(duration) ||
+        duration < 0
+      ) {
+        errors.push(
+          `Step ${step.id || "(no ID)"} must have a valid wait duration in milliseconds.`
+        );
+      }
+    }
   }
 
   return errors;
@@ -105,24 +177,5 @@ export function validateWorkflow(workflow: Workflow): string[] {
  */
 export function isWorkflowReady(workflow: Workflow): boolean {
   return validateWorkflow(workflow).length === 0;
-}
-
-/**
- * Checks whether an action is supported by OmniSight.
- * Returns true if the action belongs to the supported action list.
- */
-export function isSupportedAction(
-  action: string
-): action is WorkflowAction {
-  const supportedActions: WorkflowAction[] = [
-    "goto",
-    "click",
-    "type",
-    "select",
-    "wait",
-    "extract",
-  ];
-
-  return supportedActions.includes(action as WorkflowAction);
 }
 ```
