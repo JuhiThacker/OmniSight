@@ -1,13 +1,10 @@
-
+```typescript
 import {
   isWorkflowReady,
   validateWorkflow,
   type Workflow,
 } from "./workflow";
 
-/**
- * Creates a valid sample workflow for testing.
- */
 function createValidWorkflow(): Workflow {
   return {
     name: "Login Workflow",
@@ -36,22 +33,12 @@ function createValidWorkflow(): Workflow {
   };
 }
 
-/**
- * Simple assertion helper.
- * Throws an error if a test expectation is not met.
- */
-function assert(
-  condition: boolean,
-  message: string
-): void {
+function assert(condition: boolean, message: string): void {
   if (!condition) {
     throw new Error(`Test failed: ${message}`);
   }
 }
 
-/**
- * Test 1: A valid workflow should pass validation.
- */
 function testValidWorkflow(): void {
   const workflow = createValidWorkflow();
 
@@ -66,9 +53,6 @@ function testValidWorkflow(): void {
   );
 }
 
-/**
- * Test 2: An empty workflow name should be rejected.
- */
 function testMissingWorkflowName(): void {
   const workflow = createValidWorkflow();
   workflow.name = "";
@@ -81,9 +65,6 @@ function testMissingWorkflowName(): void {
   );
 }
 
-/**
- * Test 3: An invalid base URL should be rejected.
- */
 function testInvalidBaseUrl(): void {
   const workflow = createValidWorkflow();
   workflow.baseUrl = "not-a-valid-url";
@@ -96,9 +77,6 @@ function testInvalidBaseUrl(): void {
   );
 }
 
-/**
- * Test 4: A workflow without steps should be rejected.
- */
 function testMissingSteps(): void {
   const workflow = createValidWorkflow();
   workflow.steps = [];
@@ -111,12 +89,8 @@ function testMissingSteps(): void {
   );
 }
 
-/**
- * Test 5: Duplicate step IDs should be rejected.
- */
 function testDuplicateStepIds(): void {
   const workflow = createValidWorkflow();
-
   workflow.steps[1].id = workflow.steps[0].id;
 
   assert(
@@ -127,12 +101,8 @@ function testDuplicateStepIds(): void {
   );
 }
 
-/**
- * Test 6: Actions that require a target must have one.
- */
 function testMissingTarget(): void {
   const workflow = createValidWorkflow();
-
   workflow.steps[1].target = "";
 
   assert(
@@ -143,12 +113,8 @@ function testMissingTarget(): void {
   );
 }
 
-/**
- * Test 7: A typing action must have a value.
- */
 function testMissingTypingValue(): void {
   const workflow = createValidWorkflow();
-
   workflow.steps[1].value = "";
 
   assert(
@@ -159,9 +125,20 @@ function testMissingTypingValue(): void {
   );
 }
 
-/**
- * Run all validation tests.
- */
+function testUnsupportedAction(): void {
+  const workflow = createValidWorkflow();
+
+  workflow.steps[0].action =
+    "invalid-action" as Workflow["steps"][number]["action"];
+
+  assert(
+    validateWorkflow(workflow).some((error) =>
+      error.includes("unsupported action")
+    ),
+    "An unsupported action should produce an error."
+  );
+}
+
 function runWorkflowValidationTests(): void {
   const tests: Array<[string, () => void]> = [
     ["Valid workflow", testValidWorkflow],
@@ -171,6 +148,7 @@ function runWorkflowValidationTests(): void {
     ["Duplicate step IDs", testDuplicateStepIds],
     ["Missing action target", testMissingTarget],
     ["Missing typing value", testMissingTypingValue],
+    ["Unsupported action", testUnsupportedAction],
   ];
 
   let passed = 0;
@@ -181,8 +159,10 @@ function runWorkflowValidationTests(): void {
     console.log(`PASS: ${name}`);
   }
 
-  console.log(`\n${passed}/${tests.length} workflow validation tests passed.`);
+  console.log(
+    `\n${passed}/${tests.length} workflow validation tests passed.`
+  );
 }
 
 runWorkflowValidationTests();
-
+```
