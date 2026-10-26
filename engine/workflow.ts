@@ -1,4 +1,4 @@
-```typescript
+
 /**
  * OmniSight - Workflow Definition
  * Describes the browser actions an automation workflow can perform.
@@ -178,4 +178,4 @@ export function validateWorkflow(workflow: Workflow): string[] {
 export function isWorkflowReady(workflow: Workflow): boolean {
   return validateWorkflow(workflow).length === 0;
 }
-```
+
