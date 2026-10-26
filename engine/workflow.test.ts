@@ -1,4 +1,4 @@
-```typescript
+
 import {
   isWorkflowReady,
   validateWorkflow,
@@ -165,4 +165,4 @@ function runWorkflowValidationTests(): void {
 }
 
 runWorkflowValidationTests();
-```
+
