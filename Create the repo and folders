@@ -1,0 +1,7 @@
+mkdir omnisight && cd omnisight
+git init
+mkdir engine perception healing planner server dashboard test_app docs
+touch engine/__init__.py perception/__init__.py healing/__init__.py
+planner/__init__.py server/__init__.py test_app/__init__.py
+printf "__pycache__\n.venv\n.env\nruns/\n*.db\n" > .gitignore
+echo "# Devlog" > docs/devlog.md
