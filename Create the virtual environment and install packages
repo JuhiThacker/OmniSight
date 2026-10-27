@@ -1,0 +1,6 @@
+python -m venv .venv
+# Windows: .venv\Scripts\activate
+# Mac/Linux: source .venv/bin/activate
+pip install playwright python-dotenv fastapi uvicorn flask pillow requests
+playwright install chromium
+pip freeze > requirements.txt
