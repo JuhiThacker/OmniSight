@@ -1,0 +1,23 @@
+{
+"name": "shoesmart-demo",
+"startUrl": "http://localhost:5000",
+"steps": [
+{ "id": 1, "action": "click", "target": { "description": "Login button",
+"selector": "#login-btn" }, "expect": "Login form is visible" },
+{ "id": 2, "action": "type", "target": { "description": "Username field",
+"selector": "#username" }, "value": "demo", "expect": "Username filled" },
+{ "id": 3, "action": "type", "target": { "description": "Password field",
+"selector": "#password" }, "value": "{{PASSWORD}}", "sensitive": true,
+"expect": "Password filled" },
+{ "id": 4, "action": "click", "target": { "description": "Submit login
+button", "selector": "#submit-login" }, "expect": "User is logged in" },
+{ "id": 5, "action": "type", "target": { "description": "Search box",
+"selector": "#search" }, "value": "running shoes", "expect": "Search text
+entered" },
+{ "id": 6, "action": "click", "target": { "description": "Search button",
+"selector": "#search-btn" }, "expect": "Product results shown" },
+{ "id": 7, "action": "click", "target": { "description": "Add to cart
+button on first product", "selector": ".product:first-child .add-to-cart" },
+"expect": "Cart count increased" }
+]
+}
