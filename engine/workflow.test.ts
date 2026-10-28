@@ -1,4 +1,3 @@
-
 import {
   isWorkflowReady,
   validateWorkflow,
@@ -39,6 +38,7 @@ function assert(condition: boolean, message: string): void {
   }
 }
 
+// Test 1: A valid workflow should pass validation.
 function testValidWorkflow(): void {
   const workflow = createValidWorkflow();
 
@@ -53,6 +53,7 @@ function testValidWorkflow(): void {
   );
 }
 
+// Test 2: A missing workflow name should produce an error.
 function testMissingWorkflowName(): void {
   const workflow = createValidWorkflow();
   workflow.name = "";
@@ -65,6 +66,7 @@ function testMissingWorkflowName(): void {
   );
 }
 
+// Test 3: An invalid base URL should produce an error.
 function testInvalidBaseUrl(): void {
   const workflow = createValidWorkflow();
   workflow.baseUrl = "not-a-valid-url";
@@ -77,6 +79,7 @@ function testInvalidBaseUrl(): void {
   );
 }
 
+// Test 4: A workflow without steps should produce an error.
 function testMissingSteps(): void {
   const workflow = createValidWorkflow();
   workflow.steps = [];
@@ -89,6 +92,7 @@ function testMissingSteps(): void {
   );
 }
 
+// Test 5: Duplicate step IDs should produce an error.
 function testDuplicateStepIds(): void {
   const workflow = createValidWorkflow();
   workflow.steps[1].id = workflow.steps[0].id;
@@ -101,6 +105,7 @@ function testDuplicateStepIds(): void {
   );
 }
 
+// Test 6: A required target must not be empty.
 function testMissingTarget(): void {
   const workflow = createValidWorkflow();
   workflow.steps[1].target = "";
@@ -113,6 +118,7 @@ function testMissingTarget(): void {
   );
 }
 
+// Test 7: A typing action must have a value.
 function testMissingTypingValue(): void {
   const workflow = createValidWorkflow();
   workflow.steps[1].value = "";
@@ -125,6 +131,7 @@ function testMissingTypingValue(): void {
   );
 }
 
+// Test 8: An unsupported action should produce an error.
 function testUnsupportedAction(): void {
   const workflow = createValidWorkflow();
 
@@ -139,6 +146,71 @@ function testUnsupportedAction(): void {
   );
 }
 
+// Test 9: An invalid navigation URL should produce an error.
+function testInvalidNavigationUrl(): void {
+  const workflow = createValidWorkflow();
+  workflow.steps[0].value = "not-a-valid-url";
+
+  assert(
+    validateWorkflow(workflow).some((error) =>
+      error.includes("must have a valid destination URL")
+    ),
+    "An invalid navigation URL should produce an error."
+  );
+}
+
+// Test 10: A navigation URL using an unsupported protocol should fail.
+function testUnsupportedNavigationProtocol(): void {
+  const workflow = createValidWorkflow();
+  workflow.steps[0].value = "ftp://example.com";
+
+  assert(
+    validateWorkflow(workflow).some((error) =>
+      error.includes("destination must use HTTP or HTTPS")
+    ),
+    "A navigation URL using FTP should produce an error."
+  );
+}
+
+// Test 11: A negative wait duration should produce an error.
+function testNegativeWaitDuration(): void {
+  const workflow = createValidWorkflow();
+
+  workflow.steps.push({
+    id: "step-4",
+    action: "wait",
+    description: "Wait for the page to load",
+    value: "-100",
+  });
+
+  assert(
+    validateWorkflow(workflow).some((error) =>
+      error.includes("must have a valid wait duration")
+    ),
+    "A negative wait duration should produce an error."
+  );
+}
+
+// Test 12: A non-numeric wait duration should produce an error.
+function testNonNumericWaitDuration(): void {
+  const workflow = createValidWorkflow();
+
+  workflow.steps.push({
+    id: "step-4",
+    action: "wait",
+    description: "Wait for the page to load",
+    value: "abc",
+  });
+
+  assert(
+    validateWorkflow(workflow).some((error) =>
+      error.includes("must have a valid wait duration")
+    ),
+    "A non-numeric wait duration should produce an error."
+  );
+}
+
+// Run all workflow validation tests.
 function runWorkflowValidationTests(): void {
   const tests: Array<[string, () => void]> = [
     ["Valid workflow", testValidWorkflow],
@@ -149,6 +221,13 @@ function runWorkflowValidationTests(): void {
     ["Missing action target", testMissingTarget],
     ["Missing typing value", testMissingTypingValue],
     ["Unsupported action", testUnsupportedAction],
+    ["Invalid navigation URL", testInvalidNavigationUrl],
+    [
+      "Unsupported navigation protocol",
+      testUnsupportedNavigationProtocol,
+    ],
+    ["Negative wait duration", testNegativeWaitDuration],
+    ["Non-numeric wait duration", testNonNumericWaitDuration],
   ];
 
   let passed = 0;
@@ -165,4 +244,3 @@ function runWorkflowValidationTests(): void {
 }
 
 runWorkflowValidationTests();
-
