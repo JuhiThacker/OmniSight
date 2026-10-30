@@ -1,4 +1,5 @@
 
+
 {
   "name": "UI Failure Demo",
   "baseUrl": "https://example.com",
@@ -6,13 +7,22 @@
     {
       "id": "step-1",
       "action": "goto",
-      "description": "Open the demo webpage"
+      "description": "Open the demo webpage",
+      "value": "https://example.com"
     },
     {
       "id": "step-2",
       "action": "extract",
-      "description": "Check the page heading",
-      "target": "h1"
+      "description": "Verify the demo page content",
+      "target": "body",
+      "expectedText": "This domain is for use in documentation examples"
+    },
+    {
+      "id": "step-3",
+      "action": "extract",
+      "description": "Verify the page title",
+      "target": "title",
+      "expectedText": "Example Domain"
     }
   ]
 }
