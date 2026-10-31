@@ -1,0 +1,124 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniSight - Shopping Demo</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f6fa;
+            color: #222;
+        }
+
+        header {
+            background: #242b45;
+            color: white;
+            padding: 22px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 35px auto;
+            padding: 20px;
+        }
+
+        .product {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .product-image {
+            width: 220px;
+            height: 200px;
+            background: #e4e9f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 75px;
+            border-radius: 10px;
+            flex-shrink: 0;
+        }
+
+        .product-info {
+            flex: 1;
+        }
+
+        .price {
+            color: #16834a;
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        .checkout {
+            margin-top: 20px;
+            width: 100%;
+            padding: 15px;
+            background: #2457d6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 17px;
+            cursor: pointer;
+        }
+
+        /* Intentional UI bug:
+           The checkout button is too wide on mobile screens. */
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+
+            .product {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .product-image {
+                width: 100%;
+            }
+
+            .checkout {
+                width: 650px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>OmniSight Shopping Store</h1>
+        <p>Multimodal UI Testing Demo</p>
+    </header>
+
+    <main class="container">
+        <section class="product">
+            <div class="product-image">🎧</div>
+
+            <div class="product-info">
+                <h2>Wireless Headphones</h2>
+                <p>Comfortable wireless headphones with clear sound.</p>
+                <p class="price">₹1,499</p>
+                <p>Free delivery available</p>
+
+                <button class="checkout">
+                    Proceed to Checkout
+                </button>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

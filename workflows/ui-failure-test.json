@@ -1,0 +1,27 @@
+
+{
+  "name": "UI Failure Screenshot Test",
+  "baseUrl": "https://example.com",
+  "steps": [
+    {
+      "id": "failure-step-1",
+      "action": "goto",
+      "description": "Open the example website",
+      "value": "https://example.com"
+    },
+    {
+      "id": "failure-step-2",
+      "action": "extract",
+      "description": "Check for deliberately incorrect page content",
+      "target": "body",
+      "expectedText": "THIS_TEXT_SHOULD_NOT_EXIST"
+    },
+    {
+      "id": "failure-step-3",
+      "action": "extract",
+      "description": "Verify that the page title is still available",
+      "target": "title",
+      "expectedText": "Example Domain"
+    }
+  ]
+}

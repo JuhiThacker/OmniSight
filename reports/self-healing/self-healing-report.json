@@ -1,0 +1,22 @@
+{
+  "project": "OmniSight",
+  "test": "Mobile UI Self-Healing Test",
+  "beforeFix": {
+    "viewportWidth": 390,
+    "documentWidth": 685,
+    "horizontalOverflow": true,
+    "buttonWidth": 650,
+    "buttonRight": 685,
+    "buttonOverflows": true
+  },
+  "repairApplied": true,
+  "afterFix": {
+    "viewportWidth": 390,
+    "documentWidth": 390,
+    "horizontalOverflow": false,
+    "buttonWidth": 320,
+    "buttonRight": 355,
+    "buttonOverflows": false
+  },
+  "repairSuccessful": true
+}

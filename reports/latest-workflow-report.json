@@ -1,0 +1,36 @@
+{
+  "workflowName": "UI Failure Screenshot Test",
+  "status": "FAILED",
+  "totalSteps": 3,
+  "passedSteps": 2,
+  "failedSteps": 1,
+  "startedAt": "2026-10-31T15:44:38.085Z",
+  "completedAt": "2026-10-31T15:44:39.042Z",
+  "results": [
+    {
+      "stepId": "failure-step-1",
+      "description": "Open the example website",
+      "action": "goto",
+      "status": "PASSED",
+      "message": "Opened https://example.com/",
+      "durationMs": 812
+    },
+    {
+      "stepId": "failure-step-2",
+      "description": "Check for deliberately incorrect page content",
+      "action": "extract",
+      "status": "FAILED",
+      "message": "Expected text \"THIS_TEXT_SHOULD_NOT_EXIST\" was not found. Actual result: \"This domain is for use in documentation examples without needing permission. This is not a service; avoid relying on it for testing and monitoring purposes.\n\nهذا النطاق مُخصص للاستخدام في أمثلة التوثي\"",
+      "durationMs": 86,
+      "screenshotPath": "C:\\Users\\kavya\\OmniSight\\reports\\failures\\failure-step-2-1793461478919.png"
+    },
+    {
+      "stepId": "failure-step-3",
+      "description": "Verify that the page title is still available",
+      "action": "extract",
+      "status": "PASSED",
+      "message": "Action completed and expected text \"Example Domain\" was found.",
+      "durationMs": 2
+    }
+  ]
+}

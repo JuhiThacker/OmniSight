@@ -1,0 +1,21 @@
+{
+  "project": "OmniSight",
+  "test": "Responsive UI Layout Test",
+  "desktop": {
+    "viewportWidth": 1280,
+    "documentWidth": 1280,
+    "horizontalOverflow": false
+  },
+  "mobile": {
+    "viewportWidth": 390,
+    "documentWidth": 685,
+    "horizontalOverflow": true,
+    "checkoutButton": {
+      "left": 35,
+      "right": 685,
+      "width": 650,
+      "extendsPastViewport": true
+    }
+  },
+  "detectedIssue": true
+}

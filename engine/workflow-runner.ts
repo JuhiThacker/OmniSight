@@ -1,7 +1,9 @@
+
 /**
  * OmniSight - Workflow Runner
  * Executes browser workflows using Playwright.
- * Validates steps and generates a JSON execution report.
+ * Validates steps, captures failure screenshots,
+ * and generates a JSON execution report.
  */
 
 import { chromium, type Page } from "playwright";
@@ -39,6 +41,7 @@ interface StepResult {
   status: "PASSED" | "FAILED";
   message: string;
   durationMs: number;
+  screenshotPath?: string;
 }
 
 interface WorkflowReport {
@@ -142,7 +145,6 @@ async function executeStep(
         throw new Error("The extract action requires a target selector.");
       }
 
-      // Special target "title" extracts the browser page title.
       if (step.target === "title") {
         const title = await page.title();
 
@@ -176,15 +178,26 @@ async function executeStep(
 /**
  * Runs the complete workflow and records the results.
  */
-async function runWorkflow(workflow: Workflow): Promise<WorkflowReport> {
+async function runWorkflow(
+  workflow: Workflow
+): Promise<WorkflowReport> {
   const browser = await chromium.launch({ headless: true });
 
-  const page = await browser.newPage();
+  const page = await browser.newPage({
+    viewport: { width: 1280, height: 800 },
+  });
 
   page.setDefaultTimeout(10000);
 
   const results: StepResult[] = [];
   const startedAt = new Date().toISOString();
+
+  const evidenceDirectory = path.resolve(
+    "reports",
+    "failures"
+  );
+
+  await mkdir(evidenceDirectory, { recursive: true });
 
   try {
     for (const step of workflow.steps) {
@@ -193,14 +206,14 @@ async function runWorkflow(workflow: Workflow): Promise<WorkflowReport> {
       try {
         const actualResult = await executeStep(page, step);
 
-        // Check whether the expected text is present.
-        if (step.expectedText) {
-          if (!actualResult.includes(step.expectedText)) {
-            throw new Error(
-              `Expected text "${step.expectedText}" was not found. ` +
-                `Actual result: "${actualResult.slice(0, 200)}"`
-            );
-          }
+        if (
+          step.expectedText &&
+          !actualResult.includes(step.expectedText)
+        ) {
+          throw new Error(
+            `Expected text "${step.expectedText}" was not found. ` +
+              `Actual result: "${actualResult.slice(0, 200)}"`
+          );
         }
 
         results.push({
@@ -216,7 +229,36 @@ async function runWorkflow(workflow: Workflow): Promise<WorkflowReport> {
 
         console.log(`PASSED: ${step.id} - ${step.description}`);
       } catch (error: unknown) {
-        const message = getErrorMessage(error);
+        let message = getErrorMessage(error);
+        let screenshotPath: string | undefined;
+
+        // Capture the browser state when a step fails.
+        try {
+          const safeStepId = step.id.replace(
+            /[^a-zA-Z0-9_-]/g,
+            "_"
+          );
+
+          screenshotPath = path.join(
+            evidenceDirectory,
+            `${safeStepId}-${Date.now()}.png`
+          );
+
+          await page.screenshot({
+            path: screenshotPath,
+            fullPage: true,
+            timeout: 10000,
+          });
+
+          console.log(
+            `Failure screenshot saved: ${screenshotPath}`
+          );
+        } catch (screenshotError: unknown) {
+          message +=
+            ` | Screenshot capture failed: ${getErrorMessage(screenshotError)}`;
+
+          screenshotPath = undefined;
+        }
 
         results.push({
           stepId: step.id,
@@ -225,6 +267,7 @@ async function runWorkflow(workflow: Workflow): Promise<WorkflowReport> {
           status: "FAILED",
           message,
           durationMs: Date.now() - stepStarted,
+          ...(screenshotPath ? { screenshotPath } : {}),
         });
 
         console.error(`FAILED: ${step.id} - ${message}`);
@@ -273,7 +316,11 @@ async function main(): Promise<void> {
   let workflow: Workflow;
 
   try {
-    const fileContent = await readFile(absoluteWorkflowPath, "utf-8");
+    const fileContent = await readFile(
+      absoluteWorkflowPath,
+      "utf-8"
+    );
+
     workflow = JSON.parse(fileContent) as Workflow;
   } catch (error: unknown) {
     console.error(
@@ -283,17 +330,11 @@ async function main(): Promise<void> {
     return;
   }
 
-  // Validate the workflow before opening a browser.
   const validationResult = validateWorkflow(workflow);
 
   if (validationResult.length > 0) {
     console.error("Workflow validation failed:");
-    console.error(
-      Array.isArray(validationResult)
-        ? validationResult
-        : "The workflow is invalid."
-    );
-
+    console.error(validationResult);
     process.exitCode = 1;
     return;
   }
@@ -305,7 +346,9 @@ async function main(): Promise<void> {
   try {
     report = await runWorkflow(workflow);
   } catch (error: unknown) {
-    console.error(`Workflow execution error: ${getErrorMessage(error)}`);
+    console.error(
+      `Workflow execution error: ${getErrorMessage(error)}`
+    );
     process.exitCode = 1;
     return;
   }
@@ -319,7 +362,11 @@ async function main(): Promise<void> {
     "latest-workflow-report.json"
   );
 
-  await writeFile(reportPath, JSON.stringify(report, null, 2), "utf-8");
+  await writeFile(
+    reportPath,
+    JSON.stringify(report, null, 2),
+    "utf-8"
+  );
 
   console.log("\n=== OmniSight Workflow Report ===");
   console.log(`Workflow: ${report.workflowName}`);
@@ -335,6 +382,8 @@ async function main(): Promise<void> {
 }
 
 main().catch((error: unknown) => {
-  console.error(`Unexpected error: ${getErrorMessage(error)}`);
+  console.error(
+    `Unexpected error: ${getErrorMessage(error)}`
+  );
   process.exitCode = 1;
 });
