@@ -1,0 +1,60 @@
+### VISUAL ANALYSIS
+The webpage displays a mobile view of a single-product shopping card:
+* **Header:** A dark navy banner at the top displaying the site title *"OmniSight Shopping Store"* and subtitle *"Multimodal UI Testing Demo"*.
+* **Product Card:** A centered, white card with rounded corners and a subtle drop shadow containing:
+  * A light grey-blue rectangular image box with a headphone emoji (🎧).
+  * Product title (*"Wireless Headphones"*), short description, green price tag (*"₹1,499"*), and delivery status (*"Free delivery available"*).
+  * A primary blue call-to-action button labelled *"Proceed to Checkout"*.
+
+---
+
+### DETECTED UI ISSUES
+1. **Element Overflow:** The *"Proceed to Checkout"* button dramatically overflows its parent card container on the right side, extending off the right edge of the visible content area.
+2. **Page Width & Background Inconsistency:** The header background stops abruptly on the right side, leaving a blank light grey strip. This indicates that an oversized element has forced the page canvas to expand beyond the intended 390px mobile viewport, causing horizontal overflow.
+
+---
+
+### LIKELY TECHNICAL CAUSE
+The issue is caused directly by the checkout button element (`<button class="checkout">`). 
+
+In the CSS media query for mobile screens (`@media (max-width: 600px)`):
+```css
+.checkout {
+    width: 650px;
+}
+```
+At a mobile viewport width of 390px, assigning a fixed width of `650px` to `.checkout` forces the button to expand 260px wider than the screen itself, bursting through the boundaries of `.product-info`, `.product`, and `.container`.
+
+---
+
+### SUGGESTED CSS FIX
+Replace the fixed `width: 650px` rule within the mobile media query with a responsive relative width, or remove the rule entirely so it inherits the base style (`width: 100%`).
+
+```css
+@media (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
+
+    .product {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .product-image {
+        width: 100%;
+    }
+
+    .checkout {
+        width: 100%;
+        max-width: 100%;
+    }
+}
+```
+
+---
+
+### EXPECTED RESULT
+* The *"Proceed to Checkout"* button will fit neatly within the white product card, spanning 100% of the available inner width.
+* The unwanted horizontal overflow will be resolved, eliminating horizontal scrolling.
+* The top header banner will stretch across the entire width of the mobile viewport consistently without right-side clipping.
