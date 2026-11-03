@@ -1,0 +1,18 @@
+{
+  "pageSummary": "A mobile shopping demo page displaying a product card for Wireless Headphones with title, description, price, and a checkout button.",
+  "issueDetected": true,
+  "issues": [
+    {
+      "element": ".checkout",
+      "description": "The checkout button overflows out of the product container card to the right on mobile screens.",
+      "severity": "high",
+      "evidence": "The blue 'Proceed to Checkout' button extends beyond the boundary of the white product card and viewport content.",
+      "likelyCause": "Inside the @media (max-width: 600px) media query, .checkout is assigned a fixed width of 650px (width: 650px;), which exceeds the viewport and parent container width.",
+      "suggestedCSS": "@media (max-width: 600px) { .checkout { width: 100%; } }"
+    }
+  ],
+  "recommendations": [
+    "Set the checkout button width to 100% instead of a fixed pixel value on mobile screens.",
+    "Use max-width: 100% on interactive elements to prevent horizontal overflow across responsive viewports."
+  ]
+}
