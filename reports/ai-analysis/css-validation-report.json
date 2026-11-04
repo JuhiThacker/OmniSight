@@ -1,0 +1,22 @@
+{
+  "project": "OmniSight",
+  "test": "AI-Generated CSS Safety Validation",
+  "inputFile": "gemini-structured-analysis.json",
+  "totalSuggestions": 1,
+  "approvedSuggestions": 1,
+  "rejectedSuggestions": 0,
+  "results": [
+    {
+      "element": ".checkout",
+      "accepted": true,
+      "originalCSS": "@media (max-width: 600px) { .checkout { width: 100%; } }",
+      "validatedCSS": ".checkout {\n  width: 100%;\n}",
+      "reasons": [
+        "Selector is approved.",
+        "All CSS properties and values passed the allowlist checks."
+      ]
+    }
+  ],
+  "overallStatus": "APPROVED",
+  "note": "Only allowlisted CSS suggestions are accepted. This check does not replace full browser, security, or regression testing."
+}
