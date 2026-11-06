@@ -3,6 +3,7 @@ import { chromium } from "playwright";
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { validateSuggestedCSS } from "./css-safety";
 
 async function main() {
     const browser = await chromium.launch({ headless: true });
@@ -24,7 +25,7 @@ async function main() {
 
         await page.goto(webpage);
 
-        // Measure the original mobile layout.
+        // Measure the original layout.
         const beforeFix = await page.evaluate(() => {
             const button = document.querySelector(
                 ".checkout"
@@ -50,29 +51,48 @@ async function main() {
             fullPage: true
         });
 
-        console.log("Original mobile screenshot saved.");
+        console.log("Original layout measured.");
+
+        // Example AI-style CSS suggestion for the detected issue.
+        const suggestedCSS = `
+            @media (max-width: 600px) {
+                .checkout {
+                    width: 100%;
+                    max-width: 100%;
+                }
+            }
+        `;
+
+        // Validate the suggestion before applying it.
+        const validation = validateSuggestedCSS(suggestedCSS);
+
+        console.log("\nCSS validation result:");
+        console.log(JSON.stringify(validation, null, 2));
 
         let repairApplied = false;
 
-        // Apply a CSS repair if the checkout button overflows.
-        if (beforeFix.buttonOverflows) {
-            console.log("UI issue detected. Applying CSS repair...");
+        if (beforeFix.buttonOverflows && validation.accepted &&
+            validation.validatedCSS) {
 
+            console.log("\nApproved CSS found. Applying correction...");
+
+            // Keep the correction limited to mobile screens.
             await page.addStyleTag({
                 content: `
                     @media (max-width: 600px) {
-                        .checkout {
-                            width: 100% !important;
-                            max-width: 100% !important;
-                        }
+                        ${validation.validatedCSS}
                     }
                 `
             });
 
             repairApplied = true;
+        } else {
+            console.log(
+                "\nNo correction applied. Issue absent or CSS not approved."
+            );
         }
 
-        // Measure the layout again after the repair.
+        // Measure the layout after the attempted correction.
         const afterFix = await page.evaluate(() => {
             const button = document.querySelector(
                 ".checkout"
@@ -100,8 +120,9 @@ async function main() {
 
         const report = {
             project: "OmniSight",
-            test: "Mobile UI Self-Healing Test",
+            test: "Validated CSS Self-Healing Test",
             beforeFix,
+            cssValidation: validation,
             repairApplied,
             afterFix,
             repairSuccessful:
@@ -116,11 +137,12 @@ async function main() {
             "utf-8"
         );
 
-        console.log("\n=== SELF-HEALING TEST REPORT ===");
+        console.log("\n=== VALIDATED SELF-HEALING REPORT ===");
         console.log(JSON.stringify(report, null, 2));
 
         console.log("\nScreenshots and report saved in:");
         console.log(outputDirectory);
+
     } finally {
         await browser.close();
     }
