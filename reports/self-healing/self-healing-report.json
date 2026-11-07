@@ -1,6 +1,6 @@
 {
   "project": "OmniSight",
-  "test": "Mobile UI Self-Healing Test",
+  "test": "Validated CSS Self-Healing Test",
   "beforeFix": {
     "viewportWidth": 390,
     "documentWidth": 685,
@@ -8,6 +8,13 @@
     "buttonWidth": 650,
     "buttonRight": 685,
     "buttonOverflows": true
+  },
+  "cssValidation": {
+    "accepted": true,
+    "validatedCSS": ".checkout {\n  width: 100%;\n  max-width: 100%;\n}",
+    "reasons": [
+      "CSS passed all allowlist checks."
+    ]
   },
   "repairApplied": true,
   "afterFix": {
