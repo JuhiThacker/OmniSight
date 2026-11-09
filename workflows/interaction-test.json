@@ -1,0 +1,45 @@
+{
+  "name": "OmniSight Interaction Actions Test",
+  "baseUrl": "http://127.0.0.1:4173",
+  "steps": [
+    {
+      "id": "step-1",
+      "action": "goto",
+      "description": "Open the interaction test page",
+      "value": "http://127.0.0.1:4173"
+    },
+    {
+      "id": "step-2",
+      "action": "type",
+      "description": "Enter the user's name",
+      "target": "#username",
+      "value": "Kavya"
+    },
+    {
+      "id": "step-3",
+      "action": "select",
+      "description": "Choose Hyderabad from the city dropdown",
+      "target": "#city",
+      "value": "Hyderabad"
+    },
+    {
+      "id": "step-4",
+      "action": "click",
+      "description": "Click the Submit button",
+      "target": "#submit"
+    },
+    {
+      "id": "step-5",
+      "action": "wait",
+      "description": "Wait for the result to appear",
+      "value": "500"
+    },
+    {
+      "id": "step-6",
+      "action": "extract",
+      "description": "Verify the submitted information",
+      "target": "#result",
+      "expectedText": "Submitted: Kavya - Hyderabad"
+    }
+  ]
+}

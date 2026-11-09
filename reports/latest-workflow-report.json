@@ -1,36 +1,59 @@
 {
-  "workflowName": "UI Failure Screenshot Test",
-  "status": "FAILED",
-  "totalSteps": 3,
-  "passedSteps": 2,
-  "failedSteps": 1,
-  "startedAt": "2026-11-09T13:51:38.034Z",
-  "completedAt": "2026-11-09T13:51:38.434Z",
+  "workflowName": "OmniSight Interaction Actions Test",
+  "status": "PASSED",
+  "totalSteps": 6,
+  "passedSteps": 6,
+  "failedSteps": 0,
+  "startedAt": "2026-11-09T14:16:06.580Z",
+  "completedAt": "2026-11-09T14:16:07.290Z",
   "results": [
     {
-      "stepId": "failure-step-1",
-      "description": "Open the example website",
+      "stepId": "step-1",
+      "description": "Open the interaction test page",
       "action": "goto",
       "status": "PASSED",
-      "message": "Opened https://example.com/",
-      "durationMs": 292
+      "message": "Opened http://127.0.0.1:4173/",
+      "durationMs": 20
     },
     {
-      "stepId": "failure-step-2",
-      "description": "Check for deliberately incorrect page content",
-      "action": "extract",
-      "status": "FAILED",
-      "message": "Expected text \"THIS_TEXT_SHOULD_NOT_EXIST\" was not found. Actual result: \"This domain is for use in documentation examples without needing permission. This is not a service; avoid relying on it for testing and monitoring purposes.\n\nهذا النطاق مُخصص للاستخدام في أمثلة التوثي\"",
-      "durationMs": 68,
-      "screenshotPath": "C:\\Users\\kavya\\OmniSight\\reports\\failures\\failure-step-2-1794232298348.png"
+      "stepId": "step-2",
+      "description": "Enter the user's name",
+      "action": "type",
+      "status": "PASSED",
+      "message": "Entered text into: #username",
+      "durationMs": 62
     },
     {
-      "stepId": "failure-step-3",
-      "description": "Verify that the page title is still available",
+      "stepId": "step-3",
+      "description": "Choose Hyderabad from the city dropdown",
+      "action": "select",
+      "status": "PASSED",
+      "message": "Selected \"Hyderabad\" in #city",
+      "durationMs": 11
+    },
+    {
+      "stepId": "step-4",
+      "description": "Click the Submit button",
+      "action": "click",
+      "status": "PASSED",
+      "message": "Clicked element: #submit",
+      "durationMs": 45
+    },
+    {
+      "stepId": "step-5",
+      "description": "Wait for the result to appear",
+      "action": "wait",
+      "status": "PASSED",
+      "message": "Waited 500 milliseconds",
+      "durationMs": 512
+    },
+    {
+      "stepId": "step-6",
+      "description": "Verify the submitted information",
       "action": "extract",
       "status": "PASSED",
-      "message": "Action completed and expected text \"Example Domain\" was found.",
-      "durationMs": 2
+      "message": "Action completed and expected text \"Submitted: Kavya - Hyderabad\" was found.",
+      "durationMs": 5
     }
   ]
 }

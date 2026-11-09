@@ -298,6 +298,8 @@ The following results have been recorded during development:
 |---|---|
 | Workflow validation | 12/12 passing |
 | Successful workflow execution | 3/3 steps passed |
+| Full interaction workflow execution | 6/6 steps passed |
+| Interaction workflow report | reports/interaction-workflow-report.json |
 | Workflow failure detection | 1 failure correctly detected |
 | Execution continuation after failure | Verified |
 | Failure screenshot capture | Screenshot generated successfully |
@@ -310,7 +312,7 @@ These are recorded local test results. Run the relevant commands again after mak
 ## 11. Current Scope and Limitations
 
 - Browser workflow execution has been demonstrated using successful and deliberately failing workflows.
-- The `goto` and `extract` actions have been exercised in the current workflow tests. The `click`, `type`, `select`, and `wait` actions still need separate execution tests.
+- All six workflow actions (`goto`, `click`, `type`, `select`, `wait`, and `extract`) have been exercised successfully in browser workflow tests.
 - The documented UI failure scenarios are research and proposed test cases; not all have been executed.
 - The current Gemini self-healing demonstration focuses on a specific responsive checkout-width issue.
 - CSS safety validation uses a restricted allowlist and is not a complete CSS security system.
@@ -318,7 +320,7 @@ These are recorded local test results. Run the relevant commands again after mak
 
 ## 12. Future Enhancements
 
-- Add execution tests for all six workflow actions.
+- Expand browser workflow testing across different websites and more complex interactions.
 - Expand browser workflow testing across different websites.
 - Add more UI failure detection scenarios.
 - Improve screenshot comparison and visual regression testing.

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>OmniSight Interaction Test</title>
+</head>
+<body>
+    <h1>OmniSight Interaction Test</h1>
+
+    <label for="username">Name:</label>
+    <input id="username" type="text" placeholder="Enter your name">
+
+    <label for="city">Choose city:</label>
+    <select id="city">
+        <option value="">Select a city</option>
+        <option value="Bhubaneswar">Bhubaneswar</option>
+        <option value="Hyderabad">Hyderabad</option>
+    </select>
+
+    <button id="submit">Submit</button>
+
+    <p id="result">Waiting for submission</p>
+
+    <script>
+        document.getElementById("submit").addEventListener("click", () => {
+            const name = document.getElementById("username").value;
+            const city = document.getElementById("city").value;
+            document.getElementById("result").textContent =
+                `Submitted: ${name} - ${city}`;
+        });
+    </script>
+</body>
+</html>

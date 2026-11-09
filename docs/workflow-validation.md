@@ -72,7 +72,7 @@ The expected test result is eight passing tests, provided the current test suite
 
 Passing validation confirms that a workflow satisfies the implemented configuration checks. It does not prove that a website is accessible, that selectors match real elements, or that every browser action will execute successfully.
 
-Further work could include browser execution tests, additional edge-case tests, and clearer error reporting.
+Browser execution has now been demonstrated for all six supported workflow actions. Further work could include broader browser scenarios, additional edge-case tests, and clearer error reporting.
 
 ## 8. Conclusion
 

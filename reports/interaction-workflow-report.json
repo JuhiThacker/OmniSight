@@ -1,0 +1,59 @@
+{
+  "workflowName": "OmniSight Interaction Actions Test",
+  "status": "PASSED",
+  "totalSteps": 6,
+  "passedSteps": 6,
+  "failedSteps": 0,
+  "startedAt": "2026-11-09T14:16:06.580Z",
+  "completedAt": "2026-11-09T14:16:07.290Z",
+  "results": [
+    {
+      "stepId": "step-1",
+      "description": "Open the interaction test page",
+      "action": "goto",
+      "status": "PASSED",
+      "message": "Opened http://127.0.0.1:4173/",
+      "durationMs": 20
+    },
+    {
+      "stepId": "step-2",
+      "description": "Enter the user's name",
+      "action": "type",
+      "status": "PASSED",
+      "message": "Entered text into: #username",
+      "durationMs": 62
+    },
+    {
+      "stepId": "step-3",
+      "description": "Choose Hyderabad from the city dropdown",
+      "action": "select",
+      "status": "PASSED",
+      "message": "Selected \"Hyderabad\" in #city",
+      "durationMs": 11
+    },
+    {
+      "stepId": "step-4",
+      "description": "Click the Submit button",
+      "action": "click",
+      "status": "PASSED",
+      "message": "Clicked element: #submit",
+      "durationMs": 45
+    },
+    {
+      "stepId": "step-5",
+      "description": "Wait for the result to appear",
+      "action": "wait",
+      "status": "PASSED",
+      "message": "Waited 500 milliseconds",
+      "durationMs": 512
+    },
+    {
+      "stepId": "step-6",
+      "description": "Verify the submitted information",
+      "action": "extract",
+      "status": "PASSED",
+      "message": "Action completed and expected text \"Submitted: Kavya - Hyderabad\" was found.",
+      "durationMs": 5
+    }
+  ]
+}
