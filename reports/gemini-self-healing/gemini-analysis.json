@@ -1,0 +1,18 @@
+{
+  "pageSummary": "Shopping demo page presenting a wireless headphone product card on a mobile screen width (390px).",
+  "issueDetected": true,
+  "issues": [
+    {
+      "element": "button.checkout",
+      "description": "The 'Proceed to Checkout' button extends beyond the bounds of the product container card and causes horizontal page overflow.",
+      "severity": "high",
+      "evidence": "The blue 'Proceed to Checkout' button protrudes far to the right beyond the white product card, causing visual clipping and horizontal scroll issues.",
+      "likelyCause": "Inside the @media (max-width: 600px) query, the CSS explicitly sets '.checkout { width: 650px; }', which exceeds the mobile viewport width of 390px.",
+      "suggestedCSS": "@media (max-width: 600px) { .checkout { width: 100%; } }"
+    }
+  ],
+  "recommendations": [
+    "Set .checkout width to 100% or max-width: 100% in mobile responsive stylesheets to keep elements within viewport bounds.",
+    "Avoid using fixed pixel widths greater than standard mobile viewports in mobile media queries."
+  ]
+}
