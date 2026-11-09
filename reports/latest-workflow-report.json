@@ -4,8 +4,8 @@
   "totalSteps": 3,
   "passedSteps": 2,
   "failedSteps": 1,
-  "startedAt": "2026-10-31T15:44:38.085Z",
-  "completedAt": "2026-10-31T15:44:39.042Z",
+  "startedAt": "2026-11-09T13:51:38.034Z",
+  "completedAt": "2026-11-09T13:51:38.434Z",
   "results": [
     {
       "stepId": "failure-step-1",
@@ -13,7 +13,7 @@
       "action": "goto",
       "status": "PASSED",
       "message": "Opened https://example.com/",
-      "durationMs": 812
+      "durationMs": 292
     },
     {
       "stepId": "failure-step-2",
@@ -21,8 +21,8 @@
       "action": "extract",
       "status": "FAILED",
       "message": "Expected text \"THIS_TEXT_SHOULD_NOT_EXIST\" was not found. Actual result: \"This domain is for use in documentation examples without needing permission. This is not a service; avoid relying on it for testing and monitoring purposes.\n\nهذا النطاق مُخصص للاستخدام في أمثلة التوثي\"",
-      "durationMs": 86,
-      "screenshotPath": "C:\\Users\\kavya\\OmniSight\\reports\\failures\\failure-step-2-1793461478919.png"
+      "durationMs": 68,
+      "screenshotPath": "C:\\Users\\kavya\\OmniSight\\reports\\failures\\failure-step-2-1794232298348.png"
     },
     {
       "stepId": "failure-step-3",
